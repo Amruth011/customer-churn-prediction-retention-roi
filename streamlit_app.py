@@ -220,7 +220,7 @@ with tab2:
             'Priority Score': [45000, 4750, 850],
             'Action': ['Call Today', 'Call This Week', 'Email Campaign']
         })
-        st.table(example_data)
+        st.table(example_data.set_index('Customer'))
         st.warning("Customer B has higher churn probability but Customer A should be contacted FIRST because revenue at risk is 10x higher!")
 
 # ============================================
