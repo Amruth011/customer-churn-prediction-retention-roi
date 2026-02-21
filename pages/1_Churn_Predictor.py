@@ -36,11 +36,16 @@ st.sidebar.header("📋 Customer Details")
 
 if st.sidebar.button("📋 Load Sample HIGH RISK Customer"):
     st.session_state['sample'] = True
+    st.rerun()
 
 if st.sidebar.button("🔄 Reset to Default"):
     st.session_state['sample'] = False
+    st.rerun()
 
 sample = st.session_state.get('sample', False)
+
+if sample:
+    st.sidebar.success("✅ HIGH RISK Customer Loaded!")
 
 tenure = st.sidebar.slider("Tenure (months)", 0, 61, 0 if sample else 10)
 city_tier = st.sidebar.selectbox("City Tier", [1, 2, 3], index=2 if sample else 0)
@@ -134,7 +139,6 @@ def create_gauge(prob):
 # ============================================
 def get_churn_reasons():
     reasons = []
-
     if tenure < 3:
         reasons.append(("📅 New Customer", "Tenure < 3 months — new customers have highest churn risk", "HIGH"))
     if complain == 1:
@@ -151,10 +155,8 @@ def get_churn_reasons():
         reasons.append(("📍 Multiple Addresses", f"{number_of_address} addresses — possibly shopping across platforms", "LOW"))
     if hour_spend_on_app <= 1:
         reasons.append(("📱 Low App Usage", f"Only {hour_spend_on_app}h on app — low engagement", "LOW"))
-
     if not reasons:
         reasons.append(("✅ No Major Risk Factors", "This customer shows healthy engagement patterns", "LOW"))
-
     return reasons[:3]
 
 # ============================================
@@ -196,14 +198,13 @@ if predict_btn:
         strategy = [
             "📧 Regular engagement emails",
             "👥 Invite to referral program",
-            "🎉 Seasonal offers and discounts",
+            "🎉 Seasonal offers and discounts"
         ]
 
     campaign_cost = 500
     revenue_saved = annual_revenue * 0.30
     roi = ((revenue_saved - campaign_cost) / campaign_cost) * 100
 
-    # ── Row 1: Key Metrics ──
     col1, col2, col3, col4 = st.columns(4)
     col1.metric("Churn Probability", f"{prob*100:.1f}%")
     col2.metric("Risk Segment", risk)
@@ -212,13 +213,10 @@ if predict_btn:
 
     st.divider()
 
-    # ── Row 2: Gauge + Reasons ──
     col1, col2 = st.columns([1, 1])
-
     with col1:
         st.subheader("📊 Churn Risk Gauge")
         st.plotly_chart(create_gauge(prob), use_container_width=True)
-
     with col2:
         st.subheader("🔍 Top 3 Churn Reasons")
         for title, desc, level in reasons:
@@ -231,7 +229,6 @@ if predict_btn:
 
     st.divider()
 
-    # ── Row 3: Health Score Bar ──
     st.subheader("💚 Customer Health Score")
     health_color = "green" if health_score >= 70 else "orange" if health_score >= 40 else "red"
     st.markdown(
@@ -247,14 +244,12 @@ if predict_btn:
 
     st.divider()
 
-    # ── Row 4: Retention Strategy ──
     st.subheader("💡 Recommended Retention Strategy")
     for action in strategy:
         st.markdown(f"- {action}")
 
     st.divider()
 
-    # ── Row 5: ROI Calculator ──
     st.subheader("💰 ROI Calculator")
     col4, col5, col6 = st.columns(3)
     col4.metric("Campaign Cost", f"₹{campaign_cost:,}")
@@ -263,13 +258,22 @@ if predict_btn:
 
 else:
     st.info("👈 Fill in customer details in the sidebar and click **Predict Churn**")
-
     if sample:
         st.success("✅ Sample HIGH RISK customer loaded! Click Predict Churn now.")
-
     st.subheader("📈 Business Impact Summary")
     col1, col2, col3, col4 = st.columns(4)
     col1.metric("Total Customers", "5,630")
     col2.metric("Churn Rate", "16.84%")
     col3.metric("Annual Loss", "₹47,40,000")
     col4.metric("Potential Savings", "₹16,20,000")
+
+# ============================================
+# FOOTER
+# ============================================
+st.divider()
+st.markdown("""
+<div style='text-align: center; color: gray; padding: 10px;'>
+    Built by <b>Amruth</b> | Python • XGBoost • SHAP • Streamlit | 
+    <a href='https://github.com/Amruth011/customer-churn-prediction-retention-roi' target='_blank'>GitHub</a>
+</div>
+""", unsafe_allow_html=True)

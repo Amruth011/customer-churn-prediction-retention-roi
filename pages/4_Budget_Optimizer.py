@@ -99,3 +99,14 @@ else:
 - Medium Risk → ₹300/customer
 - Low Risk → ₹100/customer
     """)
+
+    # ============================================
+# FOOTER
+# ============================================
+st.divider()
+st.markdown("""
+<div style='text-align: center; color: gray; padding: 10px;'>
+    Built by <b>Amruth</b> | Python • XGBoost • SHAP • Streamlit | 
+    <a href='https://github.com/Amruth011/customer-churn-prediction-retention-roi' target='_blank'>GitHub</a>
+</div>
+""", unsafe_allow_html=True)

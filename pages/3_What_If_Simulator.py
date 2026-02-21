@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import joblib
+import plotly.graph_objects as go
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -19,7 +20,7 @@ if model is None:
     st.stop()
 
 st.title("🔄 What-If Retention Simulator")
-st.markdown("*See how changing customer experience impacts churn probability*")
+st.markdown("*See how retention actions impact churn probability in real time*")
 st.divider()
 
 st.subheader("👤 Current Customer Profile")
@@ -70,6 +71,7 @@ current_prob = model.predict_proba(
 
 st.divider()
 st.subheader("🎮 Simulate Retention Actions")
+st.markdown("Adjust these to see how churn probability changes:")
 
 col1, col2 = st.columns(2)
 with col1:
@@ -88,11 +90,30 @@ revenue_impact = reduction * annual_revenue
 
 st.divider()
 st.subheader("📊 Simulation Results")
-col3, col4, col5 = st.columns(3)
-col3.metric("Before Intervention", f"{current_prob*100:.1f}%")
-col4.metric("After Intervention", f"{new_prob*100:.1f}%",
+
+col1, col2, col3 = st.columns(3)
+col1.metric("Before Intervention", f"{current_prob*100:.1f}%")
+col2.metric("After Intervention", f"{new_prob*100:.1f}%",
            delta=f"{-reduction*100:.1f}%")
-col5.metric("Revenue Protected", f"₹{revenue_impact:,.0f}")
+col3.metric("Revenue Protected", f"₹{revenue_impact:,.0f}")
+
+# Plotly comparison chart
+fig = go.Figure(data=[
+    go.Bar(
+        x=['Before Intervention', 'After Intervention'],
+        y=[current_prob * 100, new_prob * 100],
+        marker_color=['#ff4444', '#44bb44' if reduction > 0 else '#ff4444'],
+        text=[f"{current_prob*100:.1f}%", f"{new_prob*100:.1f}%"],
+        textposition='auto'
+    )
+])
+fig.update_layout(
+    title="Churn Probability Before vs After Retention Actions",
+    yaxis_title="Churn Probability (%)",
+    yaxis=dict(range=[0, 100]),
+    height=350
+)
+st.plotly_chart(fig, use_container_width=True)
 
 if reduction > 0:
     st.success(f"✅ Reduced churn by {reduction*100:.1f}% — protecting ₹{revenue_impact:,.0f}!")
@@ -100,3 +121,27 @@ elif reduction == 0:
     st.warning("⚠️ No change — try different interventions")
 else:
     st.error("❌ These changes increased churn risk — reconsider strategy")
+
+st.divider()
+st.subheader("💡 Most Effective Interventions")
+st.markdown("""
+Based on SHAP analysis from our model:
+
+| Action | Impact |
+|---|---|
+| Resolve Complaint | ⭐⭐⭐ Highest Impact |
+| Increase Cashback | ⭐⭐ High Impact |
+| Improve Satisfaction | ⭐⭐ High Impact |
+| Offer More Coupons | ⭐ Medium Impact |
+""")
+
+# ============================================
+# FOOTER
+# ============================================
+st.divider()
+st.markdown("""
+<div style='text-align: center; color: gray; padding: 10px;'>
+    Built by <b>Amruth</b> | Python • XGBoost • SHAP • Streamlit | 
+    <a href='https://github.com/Amruth011/customer-churn-prediction-retention-roi' target='_blank'>GitHub</a>
+</div>
+""", unsafe_allow_html=True)
