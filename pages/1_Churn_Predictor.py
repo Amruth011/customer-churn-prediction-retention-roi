@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import joblib
 import plotly.graph_objects as go
+import shap
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -19,8 +20,13 @@ def load_model():
         st.error(f"Model loading failed: {e}")
         return None
 
+@st.cache_resource
+def load_explainer(_model):
+    return shap.TreeExplainer(_model)
+
 with st.spinner("Loading AI Model..."):
     model = load_model()
+    explainer = load_explainer(model)
 
 if model is None:
     st.stop()
@@ -135,6 +141,42 @@ def create_gauge(prob):
     return fig
 
 # ============================================
+# SHAP CHART
+# ============================================
+def create_shap_chart(input_df):
+    shap_values = explainer.shap_values(input_df)
+
+    # For XGBoost binary classification
+    if isinstance(shap_values, list):
+        sv = shap_values[1][0]
+    else:
+        sv = shap_values[0]
+
+    feature_names = input_df.columns.tolist()
+    shap_df = pd.DataFrame({
+        'Feature': feature_names,
+        'SHAP Value': sv
+    }).sort_values('SHAP Value', key=abs, ascending=False).head(10)
+
+    colors = ['#ff4444' if v > 0 else '#44bb44' for v in shap_df['SHAP Value']]
+
+    fig = go.Figure(go.Bar(
+        x=shap_df['SHAP Value'],
+        y=shap_df['Feature'],
+        orientation='h',
+        marker_color=colors,
+        text=[f"{v:+.3f}" for v in shap_df['SHAP Value']],
+        textposition='outside'
+    ))
+    fig.update_layout(
+        title="🔍 Why This Customer Will Churn (Live SHAP)",
+        xaxis_title="SHAP Value (Red = Increases Churn, Green = Decreases Churn)",
+        height=400,
+        margin=dict(l=20, r=20, t=50, b=20)
+    )
+    return fig
+
+# ============================================
 # TOP 3 CHURN REASONS
 # ============================================
 def get_churn_reasons():
@@ -159,9 +201,6 @@ def get_churn_reasons():
         reasons.append(("✅ No Major Risk Factors", "This customer shows healthy engagement patterns", "LOW"))
     return reasons[:3]
 
-# ============================================
-# HEALTH SCORE
-# ============================================
 def get_health_score(prob):
     return int((1 - prob) * 100)
 
@@ -170,7 +209,8 @@ def get_health_score(prob):
 # ============================================
 if predict_btn:
     with st.spinner("Analyzing customer profile..."):
-        prob = model.predict_proba(get_input())[0][1]
+        input_df = get_input()
+        prob = model.predict_proba(input_df)[0][1]
         health_score = get_health_score(prob)
         reasons = get_churn_reasons()
 
@@ -205,6 +245,7 @@ if predict_btn:
     revenue_saved = annual_revenue * 0.30
     roi = ((revenue_saved - campaign_cost) / campaign_cost) * 100
 
+    # Row 1 — Key Metrics
     col1, col2, col3, col4 = st.columns(4)
     col1.metric("Churn Probability", f"{prob*100:.1f}%")
     col2.metric("Risk Segment", risk)
@@ -213,6 +254,7 @@ if predict_btn:
 
     st.divider()
 
+    # Row 2 — Gauge + Reasons
     col1, col2 = st.columns([1, 1])
     with col1:
         st.subheader("📊 Churn Risk Gauge")
@@ -229,6 +271,17 @@ if predict_btn:
 
     st.divider()
 
+    # Row 3 — LIVE SHAP
+    st.subheader("🧠 Live SHAP Explanation — Why This Customer?")
+    st.markdown("*Real-time explanation from the XGBoost model showing exactly which factors drive this prediction*")
+    with st.spinner("Calculating SHAP values..."):
+        shap_fig = create_shap_chart(input_df)
+    st.plotly_chart(shap_fig, use_container_width=True)
+    st.caption("🔴 Red bars = factors INCREASING churn risk | 🟢 Green bars = factors DECREASING churn risk")
+
+    st.divider()
+
+    # Row 4 — Health Score
     st.subheader("💚 Customer Health Score")
     health_color = "green" if health_score >= 70 else "orange" if health_score >= 40 else "red"
     st.markdown(
@@ -244,12 +297,14 @@ if predict_btn:
 
     st.divider()
 
+    # Row 5 — Retention Strategy
     st.subheader("💡 Recommended Retention Strategy")
     for action in strategy:
         st.markdown(f"- {action}")
 
     st.divider()
 
+    # Row 6 — ROI Calculator
     st.subheader("💰 ROI Calculator")
     col4, col5, col6 = st.columns(3)
     col4.metric("Campaign Cost", f"₹{campaign_cost:,}")
