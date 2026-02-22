@@ -202,6 +202,7 @@ st.subheader("✅ Cross Validation Results")
 st.markdown("*Proves model is stable — not just lucky on one test:*")
 
 cv_scores = [0.9930, 0.9826, 0.9897, 0.9875, 0.9828]
+st.caption("Note: Cross-validation scores recorded during model training phase")
 cv_df = pd.DataFrame({
     'Fold': ['Fold 1', 'Fold 2', 'Fold 3', 'Fold 4', 'Fold 5'],
     'AUC Score': cv_scores

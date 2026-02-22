@@ -47,7 +47,7 @@ sample = st.session_state.get('sample', False)
 if sample:
     st.sidebar.success("✅ HIGH RISK Customer Loaded!")
 
-tenure = st.sidebar.slider("Tenure (months)", 0, 61, 0 if sample else 10)
+tenure = st.sidebar.slider("Tenure (months)", 0, 61, 1 if sample else 10)
 city_tier = st.sidebar.selectbox("City Tier", [1, 2, 3], index=2 if sample else 0)
 warehouse_to_home = st.sidebar.slider("Warehouse to Home (km)", 5, 127, 30 if sample else 15)
 hour_spend_on_app = st.sidebar.slider("Hours on App", 0, 5, 1 if sample else 3)
@@ -216,7 +216,8 @@ if predict_btn:
         ]
 
     campaign_cost = 500
-    revenue_saved = annual_revenue * 0.30
+    safe_revenue = max(annual_revenue, 1000)
+    revenue_saved = safe_revenue * 0.30
     roi = ((revenue_saved - campaign_cost) / campaign_cost) * 100
 
     # Row 1 — Key Metrics

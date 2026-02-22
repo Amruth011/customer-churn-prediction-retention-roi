@@ -83,6 +83,7 @@ if uploaded_file is not None:
             churn_pred = model.predict(df_features)
 
             results = df.copy()
+            results.insert(0, 'Customer_ID', range(1, len(df) + 1))
             results['Churn_Probability'] = (churn_probs * 100).round(1)
             results['Churn_Predicted'] = churn_pred
             results['AnnualRevenue'] = annual_revenue
