@@ -9,9 +9,6 @@ warnings.filterwarnings('ignore')
 
 st.set_page_config(page_title="Churn Predictor", page_icon="🔮", layout="wide")
 
-# ============================================
-# LOAD MODEL
-# ============================================
 @st.cache_resource
 def load_model():
     try:
@@ -35,9 +32,6 @@ st.title("🔮 Churn Predictor")
 st.markdown("**Predict which customers will churn & get personalized retention strategy**")
 st.divider()
 
-# ============================================
-# SIDEBAR INPUTS
-# ============================================
 st.sidebar.header("📋 Customer Details")
 
 if st.sidebar.button("📋 Load Sample HIGH RISK Customer"):
@@ -81,9 +75,6 @@ order_cat = st.sidebar.selectbox("Preferred Order Category", [0,1,2,3,4,5],
 annual_revenue = st.sidebar.number_input("Customer Annual Revenue (₹)", 0, 500000, 5000, 1000)
 predict_btn = st.sidebar.button("🔮 Predict Churn", type="primary")
 
-# ============================================
-# FEATURE ENGINEERING
-# ============================================
 def get_input():
     return pd.DataFrame([{
         'Tenure': tenure,
@@ -112,9 +103,6 @@ def get_input():
         'device_loyalty': devices_registered
     }])
 
-# ============================================
-# GAUGE CHART
-# ============================================
 def create_gauge(prob):
     fig = go.Figure(go.Indicator(
         mode="gauge+number+delta",
@@ -140,26 +128,18 @@ def create_gauge(prob):
     fig.update_layout(height=300, margin=dict(l=20, r=20, t=40, b=20))
     return fig
 
-# ============================================
-# SHAP CHART
-# ============================================
 def create_shap_chart(input_df):
     shap_values = explainer.shap_values(input_df)
-
-    # For XGBoost binary classification
     if isinstance(shap_values, list):
         sv = shap_values[1][0]
     else:
         sv = shap_values[0]
-
     feature_names = input_df.columns.tolist()
     shap_df = pd.DataFrame({
         'Feature': feature_names,
         'SHAP Value': sv
     }).sort_values('SHAP Value', key=abs, ascending=False).head(10)
-
     colors = ['#ff4444' if v > 0 else '#44bb44' for v in shap_df['SHAP Value']]
-
     fig = go.Figure(go.Bar(
         x=shap_df['SHAP Value'],
         y=shap_df['Feature'],
@@ -169,16 +149,13 @@ def create_shap_chart(input_df):
         textposition='outside'
     ))
     fig.update_layout(
-        title="🔍 Why This Customer Will Churn (Live SHAP)",
+        title="Why This Customer Will Churn (Live SHAP)",
         xaxis_title="SHAP Value (Red = Increases Churn, Green = Decreases Churn)",
         height=400,
         margin=dict(l=20, r=20, t=50, b=20)
     )
     return fig
 
-# ============================================
-# TOP 3 CHURN REASONS
-# ============================================
 def get_churn_reasons():
     reasons = []
     if tenure < 3:
@@ -188,7 +165,7 @@ def get_churn_reasons():
     if satisfaction_score <= 2:
         reasons.append(("😞 Low Satisfaction", f"Satisfaction score {satisfaction_score}/5 — very dissatisfied customer", "HIGH"))
     if cashback_amount < 100:
-        reasons.append(("💸 Low Cashback", f"Only ₹{cashback_amount} cashback — low incentive to stay", "MEDIUM"))
+        reasons.append(("💸 Low Cashback", f"Only Rs.{cashback_amount} cashback — low incentive to stay", "MEDIUM"))
     if day_since_last_order > 20:
         reasons.append(("🕐 Inactive", f"No order in {day_since_last_order} days — losing engagement", "MEDIUM"))
     if order_count <= 1:
@@ -204,9 +181,6 @@ def get_churn_reasons():
 def get_health_score(prob):
     return int((1 - prob) * 100)
 
-# ============================================
-# MAIN PREDICTION
-# ============================================
 if predict_btn:
     with st.spinner("Analyzing customer profile..."):
         input_df = get_input()
@@ -273,11 +247,11 @@ if predict_btn:
 
     # Row 3 — LIVE SHAP
     st.subheader("🧠 Live SHAP Explanation — Why This Customer?")
-    st.markdown("*Real-time explanation from the XGBoost model showing exactly which factors drive this prediction*")
+    st.markdown("*Real-time explanation from XGBoost model showing exactly which factors drive this prediction*")
     with st.spinner("Calculating SHAP values..."):
         shap_fig = create_shap_chart(input_df)
     st.plotly_chart(shap_fig, use_container_width=True)
-    st.caption("🔴 Red bars = factors INCREASING churn risk | 🟢 Green bars = factors DECREASING churn risk")
+    st.caption("Red bars = factors INCREASING churn risk | Green bars = factors DECREASING churn risk")
 
     st.divider()
 
@@ -311,6 +285,37 @@ if predict_btn:
     col5.metric("Revenue Saved", f"₹{revenue_saved:,.0f}")
     col6.metric("ROI", f"{roi:.0f}%")
 
+    st.divider()
+
+    # Row 7 — Priority Score
+    st.subheader("🎯 Customer Priority Score")
+    st.markdown("*Where does this customer rank in your retention queue?*")
+
+    priority_score = annual_revenue * prob
+
+    if priority_score >= 20000:
+        priority_label = "PRIORITY 1 — Contact Immediately"
+        priority_color = "red"
+        priority_action = "High value customer with high churn risk — every day of delay costs money"
+    elif priority_score >= 5000:
+        priority_label = "PRIORITY 2 — Contact This Week"
+        priority_color = "orange"
+        priority_action = "Medium priority — schedule retention outreach within 7 days"
+    else:
+        priority_label = "PRIORITY 3 — Standard Follow-up"
+        priority_color = "green"
+        priority_action = "Low urgency — include in regular engagement campaigns"
+
+    col1, col2, col3 = st.columns(3)
+    col1.metric("Annual Revenue", f"₹{annual_revenue:,}")
+    col2.metric("Churn Probability", f"{prob*100:.1f}%")
+    col3.metric("Priority Score", f"{priority_score:,.0f}")
+
+    st.markdown(
+        f"<h3 style='color:{priority_color}'>{priority_label}</h3>",
+        unsafe_allow_html=True)
+    st.info(priority_action)
+
 else:
     st.info("👈 Fill in customer details in the sidebar and click **Predict Churn**")
     if sample:
@@ -322,9 +327,6 @@ else:
     col3.metric("Annual Loss", "₹47,40,000")
     col4.metric("Potential Savings", "₹16,20,000")
 
-# ============================================
-# FOOTER
-# ============================================
 st.divider()
 st.markdown("""
 <div style='text-align: center; color: gray; padding: 10px;'>
