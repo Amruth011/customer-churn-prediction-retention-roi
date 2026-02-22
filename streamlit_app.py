@@ -155,6 +155,25 @@ business teams actually use daily
     """)
 
 st.divider()
+st.subheader("❓ How to Use This Dashboard")
+with st.expander("Click here for quick guide"):
+    st.markdown("""
+**For Business Users:**
+1. Go to **Churn Predictor** → Enter customer details → Get instant churn prediction
+2. Go to **Batch Analysis** → Upload CSV of customers → Get predictions for all
+3. Go to **Budget Optimizer** → Enter your budget → Get optimal allocation plan
+
+**For Data Scientists:**
+1. Go to **Model Transparency** → See real metrics, ROC curve, feature importance
+2. Go to **Cohort Analysis** → Understand when customers churn
+3. Go to **What-If Simulator** → Test which interventions work best
+
+**For Executives:**
+1. Home page shows overall business impact
+2. Priority Score tells you who to call first
+3. Budget Optimizer shows exact ROI for any budget
+    """)
+st.divider()
 
 # ============================================
 # NAVIGATION

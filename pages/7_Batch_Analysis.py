@@ -7,8 +7,7 @@ import plotly.express as px
 import warnings
 warnings.filterwarnings('ignore')
 
-st.set_page_config(page_title="Bulk Upload", page_icon="📤", layout="wide")
-
+st.set_page_config(page_title="Batch Analysis", page_icon="📊", layout="wide")
 @st.cache_resource
 def load_model():
     try:
@@ -21,8 +20,8 @@ model = load_model()
 if model is None:
     st.stop()
 
-st.title("Bulk Churn Prediction")
-st.markdown("*Upload a CSV of multiple customers — get predictions for all at once*")
+st.title("📊 Batch Customer Analysis")
+st.markdown("*Upload a CSV of multiple customers — get predictions, risk scores and priority rankings for all at once*")
 st.divider()
 
 st.subheader("How to Use")

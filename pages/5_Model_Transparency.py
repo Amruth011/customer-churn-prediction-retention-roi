@@ -136,6 +136,43 @@ with col2:
 st.divider()
 
 # ============================================
+# CLASSIFICATION REPORT
+# ============================================
+st.subheader("📋 Detailed Classification Report")
+st.markdown("*Precision, Recall and F1 Score — the complete picture:*")
+
+from sklearn.metrics import classification_report
+report = classification_report(y_test, y_pred, output_dict=True)
+report_df = pd.DataFrame(report).transpose().round(3)
+report_df = report_df.drop(['macro avg', 'weighted avg'], errors='ignore')
+report_df.index = ['Not Churned', 'Churned', 'Accuracy']
+
+col1, col2, col3, col4 = st.columns(4)
+col1.metric("Precision (Churn)", f"{report['1']['precision']:.3f}",
+    help="Of all predicted churners, how many actually churned?")
+col2.metric("Recall (Churn)", f"{report['1']['recall']:.3f}",
+    help="Of all actual churners, how many did we catch?")
+col3.metric("F1 Score (Churn)", f"{report['1']['f1-score']:.3f}",
+    help="Balance between precision and recall")
+col4.metric("AUC Score", f"{auc:.4f}",
+    help="Overall model discrimination ability")
+
+st.divider()
+
+# Class imbalance note
+total = len(y_test)
+churn_pct = (y_test.sum() / total * 100)
+st.info(
+    "📊 Class Distribution in Test Set: " +
+    str(total - int(y_test.sum())) + " Not Churned (" +
+    str(round(100 - churn_pct, 1)) + "%) vs " +
+    str(int(y_test.sum())) + " Churned (" +
+    str(round(churn_pct, 1)) + "%) — " +
+    "Model handles this imbalance well with " +
+    str(round(report['1']['recall'] * 100, 1)) + "% recall on minority class"
+)
+st.divider()
+# ============================================
 # ROC CURVE
 # ============================================
 st.subheader("📈 ROC Curve — Real AUC")
