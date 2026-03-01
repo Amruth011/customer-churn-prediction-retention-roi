@@ -141,7 +141,6 @@ st.divider()
 st.subheader("📋 Detailed Classification Report")
 st.markdown("*Precision, Recall and F1 Score — the complete picture:*")
 
-from sklearn.metrics import classification_report
 report = classification_report(y_test, y_pred, output_dict=True)
 report_df = pd.DataFrame(report).transpose().round(3)
 report_df = report_df.drop(['macro avg', 'weighted avg'], errors='ignore')
@@ -163,13 +162,10 @@ st.divider()
 total = len(y_test)
 churn_pct = (y_test.sum() / total * 100)
 st.info(
-    "📊 Class Distribution in Test Set: " +
-    str(total - int(y_test.sum())) + " Not Churned (" +
-    str(round(100 - churn_pct, 1)) + "%) vs " +
-    str(int(y_test.sum())) + " Churned (" +
-    str(round(churn_pct, 1)) + "%) — " +
-    "Model handles this imbalance well with " +
-    str(round(report['1']['recall'] * 100, 1)) + "% recall on minority class"
+    f"📊 Class Distribution in Test Set: {total - int(y_test.sum())} Not Churned "
+    f"({round(100 - churn_pct, 1)}%) vs {int(y_test.sum())} Churned "
+    f"({round(churn_pct, 1)}%) — "
+    f"Model handles this imbalance well with {round(report['1']['recall'] * 100, 1)}% recall on minority class"
 )
 st.divider()
 # ============================================
