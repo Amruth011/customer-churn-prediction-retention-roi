@@ -37,17 +37,19 @@
 
 ## 📋 Table of Contents
 
-- [The Problem](#-the-problem)
+- [Quick Start](#-quick-start)
+- [Project Mission](#-project-mission)
+- [The Problem](#the-problem)
 - [Live Demo](#-live-demo)
 - [Model Performance](#-model-performance)
-- [The 7-Page Dashboard](#-the-7-page-dashboard)
+- [The 7-Page Dashboard](#️-the-7-page-dashboard)
 - [Dataset Description](#-dataset-description)
-- [Feature Engineering](#-feature-engineering)
+- [Feature Engineering](#️-feature-engineering)
 - [Model Comparison](#-model-comparison)
 - [Key Business Insights](#-key-business-insights)
 - [Business Impact](#-business-impact)
 - [What Makes This Different](#-what-makes-this-different)
-- [Tech Stack](#-tech-stack)
+- [Tech Stack](#️-tech-stack)
 - [Project Structure](#-project-structure)
 - [Run Locally](#-run-locally)
 - [Docker](#-docker)
@@ -80,6 +82,8 @@ This project is a proof of concept that a single data scientist can build a comp
 **Built end-to-end: from raw Excel data → feature engineering → model training → SHAP explainability → 7-page live dashboard → Docker containerization.**
 
 ---
+
+## The Problem
 
 An e-commerce platform was **silently bleeding revenue.**
 
@@ -208,8 +212,7 @@ Upload a CSV of any number of customers → get predictions, risk scores, and pr
 
 ## 📁 Dataset Description
 
-**Source:** UCI ML Repository — E-Commerce Customer Dataset
-
+**Source:** UCI ML Repository — E-Commerce Customer Dataset  
 **Size:** 5,630 customers, 20 features
 
 | Column | Type | Description |
@@ -235,7 +238,7 @@ Upload a CSV of any number of customers → get predictions, risk scores, and pr
 
 ## ⚙️ Feature Engineering
 
-6 new features were created from raw data to improve model performance:
+6 new features created from raw data to improve model performance:
 
 | Feature | Formula | Business Meaning |
 |---|---|---|
@@ -252,19 +255,16 @@ Upload a CSV of any number of customers → get predictions, risk scores, and pr
 
 ## 🏆 Model Comparison
 
-4 models were trained and evaluated. XGBoost won on every metric:
+4 models trained and evaluated. XGBoost won on every metric:
 
 | Model | AUC | Accuracy | Precision | Recall | F1 |
 |---|---|---|---|---|---|
 | Logistic Regression | 0.8821 | 87.3% | 71.2% | 68.9% | 70.0% |
-| Random Forest | 0.9934 | 97.2% | 95.1% | 93.8% | 94.4% |
 | Decision Tree | 0.9421 | 93.6% | 89.3% | 87.1% | 88.2% |
+| Random Forest | 0.9934 | 97.2% | 95.1% | 93.8% | 94.4% |
 | **XGBoost** | **0.9989** | **98.76%** | **98.4%** | **97.9%** | **98.1%** |
 
-**Why XGBoost won:**
-- Gradient boosting handles class imbalance better
-- Built-in regularization prevents overfitting on the 16.84% minority class
-- Feature interactions captured that tree-based ensemble methods miss
+**Why XGBoost won:** Gradient boosting handles class imbalance better, built-in regularization prevents overfitting, and native SHAP support enables exact explainability.
 
 ---
 
@@ -272,20 +272,20 @@ Upload a CSV of any number of customers → get predictions, risk scores, and pr
 
 These insights came from the data — not assumptions:
 
-**1. Tenure is the #1 Churn Driver**
+**1. Tenure is the #1 Churn Driver**  
 New customers (0-3 months) churn at 41.9%. After 6 months the rate drops below 8%. The first 90 days are critical.
 
-**2. One Complaint Triples Churn Probability**
+**2. One Complaint Triples Churn Probability**  
 Customers who complained have a 3x higher churn rate. Complaint resolution speed is a direct revenue lever.
 
-**3. Low Cashback = High Churn**
+**3. Low Cashback = High Churn**  
 Customers receiving below-median cashback churn significantly more. Cashback is not just a cost — it's retention spend.
 
-**4. City Tier 3 is Underserved**
+**4. City Tier 3 is Underserved**  
 Tier 3 city customers churn more than Tier 1. Logistics and service quality in smaller cities needs investment.
 
-**5. Inactive Customers Are Already Gone**
-High days-since-last-order is a strong churn signal regardless of satisfaction score. Re-engagement must happen within 15 days of inactivity.
+**5. Inactive Customers Are Already Gone**  
+High days-since-last-order is a strong churn signal. Re-engagement must happen within 15 days of inactivity.
 
 ---
 
@@ -395,25 +395,18 @@ customer-churn-prediction-retention-roi/
 
 ## 🚀 Run Locally
 
-**Step 1 — Clone:**
 ```bash
+# Clone
 git clone https://github.com/Amruth011/customer-churn-prediction-retention-roi.git
 cd customer-churn-prediction-retention-roi
-```
 
-**Step 2 — Install dependencies:**
-```bash
+# Install
 pip install -r requirements.txt
-```
 
-**Step 3 — Run:**
-```bash
+# Run
 streamlit run streamlit_app.py
-```
 
-**Step 4 — Open:**
-```
-http://localhost:8501
+# Open → http://localhost:8501
 ```
 
 ---
@@ -421,14 +414,9 @@ http://localhost:8501
 ## 🐳 Docker
 
 ```bash
-# Build
 docker build -t churn-prediction-app .
-
-# Run
 docker run -p 8501:8501 churn-prediction-app
-
-# Open
-http://localhost:8501
+# Open → http://localhost:8501
 ```
 
 ---
@@ -445,88 +433,60 @@ pip install shap
 pip install openpyxl
 ```
 
-**❌ Model file not found error**
-Make sure `src/best_churn_model.pkl` exists. It's included in the repo. If missing, re-run the training notebook.
+**❌ Model file not found**  
+Ensure `src/best_churn_model.pkl` exists. It's included in the repo.
 
-**❌ Dataset not found error**
-Make sure `data/raw/E Commerce Dataset.xlsx` exists. It's included in the repo.
+**❌ Dataset not found**  
+Ensure `data/raw/E Commerce Dataset.xlsx` exists. It's included in the repo.
 
-**❌ Streamlit port already in use**
+**❌ Port already in use**
 ```bash
 streamlit run streamlit_app.py --server.port 8502
 ```
 
-**❌ SHAP chart not showing**
-This happens when the model explainer takes time to load. Wait 10-15 seconds on first prediction — it caches after that.
+**❌ SHAP chart not showing**  
+Normal on first load — explainer initializes in 10-15 seconds, then caches permanently.
 
 ---
 
 ## 🤝 Contributing
 
-This project is open for contributions! Here are ways you can help:
+**🐛 Bug?** Open an [Issue](https://github.com/Amruth011/customer-churn-prediction-retention-roi/issues).
 
-**🐛 Found a bug?**
-Open an [Issue](https://github.com/Amruth011/customer-churn-prediction-retention-roi/issues) with what happened and what you expected.
-
-**💡 Feature ideas we'd love:**
-- [ ] Add telecom / banking / SaaS datasets
+**💡 Feature ideas:**
+- [ ] Telecom / banking / SaaS dataset support
 - [ ] Email alert system for high-risk customers
 - [ ] Time-series churn trend forecasting
-- [ ] Customer segmentation with RFM analysis
-- [ ] A/B test ROI comparison module
-- [ ] Multi-language support
+- [ ] RFM customer segmentation
 - [ ] REST API endpoint for predictions
 
-**🔧 Want to contribute code?**
-```bash
-# Fork the repo on GitHub
-git clone https://github.com/YOUR_USERNAME/customer-churn-prediction-retention-roi.git
-git checkout -b feature/your-feature-name
-
-# Make changes, test locally
-streamlit run streamlit_app.py
-
-# Push and open a Pull Request
-git push origin feature/your-feature-name
-```
-
 **⭐ Simplest contribution — star the repo!**
-It helps others discover this project and motivates further development.
 
 ---
 
 ## ❓ FAQ
 
-**Q: Can I use this on my own dataset?**
+**Q: Can I use this on my own dataset?**  
+Yes. Replace the Excel file, retrain the notebook, save new `.pkl` to `src/`.
 
-Yes! Replace `data/raw/E Commerce Dataset.xlsx` with your dataset. Retrain the model in the notebook and save the new `.pkl` file to `src/`. Make sure your dataset has similar column names or update the feature list in each page file.
+**Q: Why XGBoost and not a neural network?**  
+For tabular data of this size, XGBoost consistently outperforms neural networks and supports SHAP natively.
 
-**Q: Why XGBoost and not a neural network?**
+**Q: Is the SHAP explanation real or approximated?**  
+Real. `shap.TreeExplainer` computes exact SHAP values — no approximation.
 
-For tabular data of this size (5,630 rows, 20 features), XGBoost consistently outperforms neural networks. Neural networks need much more data and tuning to beat gradient boosting on structured tabular data. XGBoost also supports SHAP natively — critical for explainability.
+**Q: How accurate is the What-If Simulator?**  
+It runs the actual trained model live on every slider change — not rules or estimates.
 
-**Q: Is the SHAP explanation real or approximated?**
-
-It's real. We use `shap.TreeExplainer` which computes exact SHAP values for tree-based models — no approximation. Every feature contribution shown in the waterfall chart is the mathematically exact attribution from the XGBoost model.
-
-**Q: How accurate is the What-If Simulator?**
-
-The simulator uses the actual trained XGBoost model to recompute churn probability each time you move a slider. It's not a rule-based estimate — it's the model itself running live.
-
-**Q: Can I deploy this on my own server?**
-
-Yes. A `Dockerfile` is included. Build the image and run it on any cloud provider (AWS, GCP, Azure, Render, Railway).
-
-**Q: The app is slow to load. Why?**
-
-Streamlit Cloud free tier has limited resources. The SHAP explainer also takes 5-10 seconds to initialize on first load. After that it's cached and fast. For production use, deploy on a paid tier or your own server.
+**Q: Can I deploy on my own server?**  
+Yes. `Dockerfile` included. Works on AWS, GCP, Azure, Render, or Railway.
 
 ---
 
 ## 🙏 Acknowledgements
 
-- **Dataset:** [UCI ML Repository — E-Commerce Customer Churn Dataset](https://www.kaggle.com/datasets/ankitverma2010/ecommerce-customer-churn-analysis-and-prediction)
-- **SHAP Library:** Lundberg & Lee (2017) — *A Unified Approach to Interpreting Model Predictions*
+- **Dataset:** [E-Commerce Customer Churn — Kaggle](https://www.kaggle.com/datasets/ankitverma2010/ecommerce-customer-churn-analysis-and-prediction)
+- **SHAP:** Lundberg & Lee (2017) — *A Unified Approach to Interpreting Model Predictions*
 - **XGBoost:** Chen & Guestrin (2016) — *XGBoost: A Scalable Tree Boosting System*
 - **Streamlit** — for making ML deployment accessible to everyone
 
@@ -538,10 +498,8 @@ Streamlit Cloud free tier has limited resources. The SHAP explainer also takes 5
 
 **Amruth Kumar M**
 
-B.Tech in Artificial Intelligence & Data Science
-REVA University, Bengaluru
-
-Data Science Intern @ iStudio
+B.Tech — Artificial Intelligence & Data Science  
+REVA University, Bengaluru | Data Science Intern @ iStudio
 
 [![GitHub](https://img.shields.io/badge/GitHub-Amruth011-181717?style=for-the-badge&logo=github)](https://github.com/Amruth011)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0A66C2?style=for-the-badge&logo=linkedin)](https://linkedin.com/in/amruth-kumar-m)
@@ -558,19 +516,13 @@ MIT License — free to use, modify, and distribute with attribution.
 
 <div align="center">
 
----
-
 ### 🌟 Found this useful?
 
-**[⭐ Star this repo](https://github.com/Amruth011/customer-churn-prediction-retention-roi)** — it takes 1 second and helps other developers and students find this project.
-
-**[🔀 Fork it](https://github.com/Amruth011/customer-churn-prediction-retention-roi/fork)** — adapt it to your own dataset and make it yours.
-
-**[🐛 Open an Issue](https://github.com/Amruth011/customer-churn-prediction-retention-roi/issues)** — found a bug or have a feature idea? Let's build it together.
+**[⭐ Star this repo](https://github.com/Amruth011/customer-churn-prediction-retention-roi)** · **[🔀 Fork it](https://github.com/Amruth011/customer-churn-prediction-retention-roi/fork)** · **[🐛 Open an Issue](https://github.com/Amruth011/customer-churn-prediction-retention-roi/issues)**
 
 ---
 
-*Built from scratch by a final-year AI & Data Science student.*
+*Built from scratch by a final-year AI & Data Science student.*  
 *Proof that production-quality ML systems are possible at the student level.*
 
 **Python • XGBoost • SHAP • Streamlit • Docker**
