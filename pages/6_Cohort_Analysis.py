@@ -211,7 +211,7 @@ lowest_churn = cohort.loc[cohort['Churn Rate %'].idxmin()]
 col1, col2, col3 = st.columns(3)
 col1.error(f"🔴 Highest Risk Group\n\n**{highest_churn['TenureGroup']}**\n\n{highest_churn['Churn Rate %']:.1f}% churn rate")
 col2.success(f"🟢 Lowest Risk Group\n\n**{lowest_churn['TenureGroup']}**\n\n{lowest_churn['Churn Rate %']:.1f}% churn rate")
-col3.info(f"📊 Overall Churn Rate\n\n**16.84%**\n\nAcross all 5,630 customers")
+col3.info("📊 Overall Churn Rate\n\n**16.84%**\n\nAcross all 5,630 customers")
 
 st.divider()
 st.markdown("""

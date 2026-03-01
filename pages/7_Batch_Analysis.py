@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
 import joblib
 import plotly.graph_objects as go
 import plotly.express as px
@@ -8,12 +7,13 @@ import warnings
 warnings.filterwarnings('ignore')
 
 st.set_page_config(page_title="Batch Analysis", page_icon="📊", layout="wide")
+
 @st.cache_resource
 def load_model():
     try:
         return joblib.load('src/best_churn_model.pkl')
     except Exception as e:
-        st.error("Model loading failed: " + str(e))
+        st.error(f"Model loading failed: {e}")
         return None
 
 model = load_model()
@@ -59,14 +59,27 @@ def engineer_features(data):
 
 if uploaded_file is not None:
     df = pd.read_csv(uploaded_file)
-    st.success("File uploaded successfully — " + str(len(df)) + " customers found!")
+    st.success(f"File uploaded successfully — {len(df)} customers found!")
 
     st.subheader("Data Preview")
     st.dataframe(df.head(10), use_container_width=True)
     st.divider()
 
     if st.button("Predict Churn for All Customers", type="primary"):
-        with st.spinner("Predicting churn for " + str(len(df)) + " customers..."):
+        required_cols = [
+            'Tenure', 'PreferredLoginDevice', 'CityTier', 'WarehouseToHome',
+            'PreferredPaymentMode', 'Gender', 'HourSpendOnApp',
+            'NumberOfDeviceRegistered', 'PreferedOrderCat', 'SatisfactionScore',
+            'MaritalStatus', 'NumberOfAddress', 'Complain',
+            'OrderAmountHikeFromlastYear', 'CouponUsed', 'OrderCount',
+            'DaySinceLastOrder', 'CashbackAmount'
+        ]
+        missing_cols = [c for c in required_cols if c not in df.columns]
+        if missing_cols:
+            st.error(f"Missing required columns: {', '.join(missing_cols)}")
+            st.stop()
+
+        with st.spinner(f"Predicting churn for {len(df)} customers..."):
 
             if 'AnnualRevenue' in df.columns:
                 annual_revenue = df['AnnualRevenue'].copy()
@@ -120,9 +133,9 @@ if uploaded_file is not None:
         col2.metric("High Risk", high_risk_count)
         col3.metric("Medium Risk", medium_risk_count)
         col4.metric("Low Risk", low_risk_count)
-        col5.metric("Avg Churn Risk", str(round(avg_prob, 1)) + "%")
+        col5.metric("Avg Churn Risk", f"{round(avg_prob, 1)}%")
 
-        st.metric("Total Revenue at Risk", "Rs." + str(round(revenue_at_risk, 0)))
+        st.metric("Total Revenue at Risk", f"Rs.{round(revenue_at_risk, 0)}")
 
         st.divider()
 
@@ -183,7 +196,7 @@ if uploaded_file is not None:
                 file_name="high_risk_customers.csv",
                 mime="text/csv"
             )
-            st.warning(str(len(high_risk_df)) + " HIGH RISK customers need immediate attention!")
+            st.warning(f"{len(high_risk_df)} HIGH RISK customers need immediate attention!")
 
 else:
     st.info("Upload a CSV file to get started!")
