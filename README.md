@@ -77,7 +77,7 @@ streamlit run streamlit_app.py
 
 Every year, businesses worldwide lose billions to customer churn — and most don't act until it's too late because they lack a system that is **predictive, explainable, and actionable** at the same time.
 
-This project is a proof of concept that a single data scientist can build a complete churn intelligence system — one that not only predicts who will leave, but explains the reasons in plain language, simulates the impact of every possible retention action, and optimizes budget allocation for maximum ROI.
+This project is a proof of concept that a single data scientist can build a complete churn intelligence system - one that not only predicts who will leave, but explains the reasons in plain language, simulates the impact of every possible retention action, and optimizes budget allocation for maximum ROI.
 
 **Built end-to-end: from raw Excel data → feature engineering → model training → SHAP explainability → 7-page live dashboard → Docker containerization.**
 
