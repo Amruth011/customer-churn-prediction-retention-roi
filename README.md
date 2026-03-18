@@ -162,7 +162,7 @@ Not all at-risk customers deserve equal attention. A customer with ₹50,000 rev
 
 ---
 
-### Page 4 — 🔄 What-If Retention Simulator
+### Page 4 - 🔄 What-If Retention Simulator
 
 Before spending money, test what actually works. Adjust 12 customer parameters and see in real time how each retention action reduces churn probability.
 
