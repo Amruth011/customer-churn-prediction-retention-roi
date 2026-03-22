@@ -241,61 +241,125 @@ docker run -p 8501:8501 churn-app
 
 ## Architecture
 
-The system is built in two phases: an **offline training pipeline** that runs once in a notebook, and an **online inference layer** that serves the live Streamlit app.
+The system has two phases: an **offline training pipeline** (notebook, runs once) and an **online inference layer** (Streamlit app, runs live).
 
-```
-╔══════════════════════════════════════════════════════════════════════╗
-║                    OFFLINE  —  Training Pipeline                     ║
-║                       (notebooks/EDA.ipynb)                          ║
-╠══════════════════════════════════════════════════════════════════════╣
-║                                                                      ║
-║  📂 Raw Excel Data (5,630 customers, 20 features)                    ║
-║         │                                                            ║
-║         ▼                                                            ║
-║  🔍 EDA & Data Quality                                               ║
-║     • Null imputation  • Outlier detection  • Class imbalance check  ║
-║         │                                                            ║
-║         ▼                                                            ║
-║  ⚙️  Feature Engineering  (6 new features created)                   ║
-║     • is_new_customer  • cashback_per_order  • order_frequency       ║
-║     • high_value_customer  • complaint_new_customer  • app_score     ║
-║         │                                                            ║
-║         ▼                                                            ║
-║  🏆 Model Training & Selection  (4 models benchmarked)               ║
-║     Logistic Reg → Decision Tree → Random Forest → XGBoost ✓        ║
-║         │                                                            ║
-║         ▼                                                            ║
-║  💾 best_churn_model.pkl   +   test_data.csv (held-out)              ║
-║                                                                      ║
-╚══════════════════════════════════════════════════════════════════════╝
-                              │
-                              │  model.pkl loaded at startup
-                              ▼
-╔══════════════════════════════════════════════════════════════════════╗
-║                     ONLINE  —  Streamlit App                         ║
-╠══════════════════════════════════════════════════════════════════════╣
-║                                                                      ║
-║  👤 User Input (single customer or CSV upload)                       ║
-║         │                                                            ║
-║         ▼                                                            ║
-║  🔮 XGBoost Inference  →  Churn Probability (0–100%)                 ║
-║         │                                                            ║
-║         ├──▶  🔍 SHAP TreeExplainer  →  Per-feature attribution      ║
-║         │         (exact values, zero approximation)                 ║
-║         │                                                            ║
-║         ├──▶  🎯 Priority Score  =  Revenue × Churn Probability      ║
-║         │                                                            ║
-║         ├──▶  🔄 What-If Simulator  →  Live re-inference on sliders  ║
-║         │                                                            ║
-║         ├──▶  💰 Budget Optimizer  →  ROI-maximizing allocation      ║
-║         │                                                            ║
-║         └──▶  📦 Batch Predictions  →  CSV download                  ║
-║                                                                      ║
-╚══════════════════════════════════════════════════════════════════════╝
-                              │
-                              ▼
-                    ☁️  Streamlit Cloud  /  🐳 Docker
-```
+<!-- Architecture SVG — renders on GitHub -->
+<p align="center">
+<svg width="100%" viewBox="0 0 680 720" xmlns="http://www.w3.org/2000/svg" style="max-width:720px;font-family:system-ui,sans-serif">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+  </defs>
+
+  <!-- ── OFFLINE ZONE ── -->
+  <rect x="30" y="20" width="620" height="365" rx="16" fill="#F3F0FF" stroke="#A78BFA" stroke-width="1"/>
+  <text x="50" y="46" font-size="10" font-weight="600" letter-spacing="1.5" fill="#7C3AED" opacity="0.7">OFFLINE — TRAINING PIPELINE  (notebooks/EDA.ipynb)</text>
+
+  <!-- Raw Data -->
+  <rect x="230" y="58" width="220" height="52" rx="8" fill="#E9E6F8" stroke="#A78BFA" stroke-width="0.8"/>
+  <text x="340" y="80" font-size="13" font-weight="600" text-anchor="middle" fill="#3C1D8A">Raw Excel data</text>
+  <text x="340" y="98" font-size="11" text-anchor="middle" fill="#5E4AAB">5,630 customers · 20 features</text>
+
+  <line x1="340" y1="110" x2="340" y2="132" stroke="#A78BFA" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- EDA -->
+  <rect x="230" y="132" width="220" height="52" rx="8" fill="#E9E6F8" stroke="#A78BFA" stroke-width="0.8"/>
+  <text x="340" y="154" font-size="13" font-weight="600" text-anchor="middle" fill="#3C1D8A">EDA &amp; data quality</text>
+  <text x="340" y="171" font-size="11" text-anchor="middle" fill="#5E4AAB">Nulls · outliers · class imbalance</text>
+
+  <line x1="340" y1="184" x2="340" y2="206" stroke="#A78BFA" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- Feature Engineering -->
+  <rect x="230" y="206" width="220" height="52" rx="8" fill="#CCFBF1" stroke="#0D9488" stroke-width="0.8"/>
+  <text x="340" y="228" font-size="13" font-weight="600" text-anchor="middle" fill="#0F4A43">Feature engineering</text>
+  <text x="340" y="245" font-size="11" text-anchor="middle" fill="#1D6B62">6 new features · r=0.449 with churn</text>
+
+  <!-- Fan out to 4 models -->
+  <path d="M230 280 L101 302" fill="none" stroke="#A78BFA" stroke-width="1.2" stroke-opacity="0.5" marker-end="url(#arr)"/>
+  <path d="M280 280 L237 302" fill="none" stroke="#A78BFA" stroke-width="1.2" stroke-opacity="0.5" marker-end="url(#arr)"/>
+  <path d="M360 280 L373 302" fill="none" stroke="#A78BFA" stroke-width="1.2" stroke-opacity="0.5" marker-end="url(#arr)"/>
+  <path d="M420 280 L548 296" fill="none" stroke="#A78BFA" stroke-width="1.2" stroke-opacity="0.5" marker-end="url(#arr)"/>
+
+  <line x1="340" y1="258" x2="340" y2="278" stroke="#A78BFA" stroke-width="1" stroke-opacity="0.4"/>
+  <text x="340" y="294" font-size="10" text-anchor="middle" fill="#7C3AED" opacity="0.55">4 models benchmarked</text>
+
+  <!-- Model boxes -->
+  <rect x="42"  y="302" width="118" height="44" rx="8" fill="#F1F0F8" stroke="#C4BFDF" stroke-width="0.8"/>
+  <text x="101" y="320" font-size="12" font-weight="600" text-anchor="middle" fill="#4B4472">Logistic reg.</text>
+  <text x="101" y="336" font-size="11" text-anchor="middle" fill="#7B7099">AUC 0.88</text>
+
+  <rect x="178" y="302" width="118" height="44" rx="8" fill="#F1F0F8" stroke="#C4BFDF" stroke-width="0.8"/>
+  <text x="237" y="320" font-size="12" font-weight="600" text-anchor="middle" fill="#4B4472">Decision tree</text>
+  <text x="237" y="336" font-size="11" text-anchor="middle" fill="#7B7099">AUC 0.94</text>
+
+  <rect x="314" y="302" width="118" height="44" rx="8" fill="#F1F0F8" stroke="#C4BFDF" stroke-width="0.8"/>
+  <text x="373" y="320" font-size="12" font-weight="600" text-anchor="middle" fill="#4B4472">Random forest</text>
+  <text x="373" y="336" font-size="11" text-anchor="middle" fill="#7B7099">AUC 0.99</text>
+
+  <!-- XGBoost winner — highlighted -->
+  <rect x="514" y="295" width="124" height="58" rx="8" fill="#CCFBF1" stroke="#0D9488" stroke-width="1.2"/>
+  <text x="576" y="313" font-size="12" font-weight="600" text-anchor="middle" fill="#0F4A43">XGBoost  ✓</text>
+  <text x="576" y="330" font-size="11" text-anchor="middle" fill="#1D6B62">AUC 0.9989</text>
+  <text x="576" y="344" font-size="11" text-anchor="middle" fill="#1D6B62">98.76% accuracy</text>
+
+  <!-- Winner arrow to pkl -->
+  <path d="M576 353 L576 375 L450 375" fill="none" stroke="#0D9488" stroke-width="1.5" stroke-opacity="0.6" marker-end="url(#arr)"/>
+
+  <!-- PKL artifact -->
+  <rect x="230" y="358" width="220" height="44" rx="8" fill="#FEF3C7" stroke="#D97706" stroke-width="0.8"/>
+  <text x="340" y="376" font-size="13" font-weight="600" text-anchor="middle" fill="#7C3700">best_churn_model.pkl</text>
+  <text x="340" y="393" font-size="11" text-anchor="middle" fill="#A05A00">saved to src/</text>
+
+  <!-- ── BRIDGE ── -->
+  <line x1="340" y1="402" x2="340" y2="440" stroke="#94A3B8" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#arr)"/>
+  <text x="360" y="425" font-size="10" fill="#94A3B8">model.pkl loaded at startup</text>
+
+  <!-- ── ONLINE ZONE ── -->
+  <rect x="30" y="444" width="620" height="254" rx="16" fill="#EFF6FF" stroke="#93C5FD" stroke-width="1"/>
+  <text x="50" y="470" font-size="10" font-weight="600" letter-spacing="1.5" fill="#1D5BAD" opacity="0.7">ONLINE — STREAMLIT APP  (Streamlit Cloud / Docker)</text>
+
+  <!-- User Input -->
+  <rect x="230" y="480" width="220" height="44" rx="8" fill="#DBEAFE" stroke="#93C5FD" stroke-width="0.8"/>
+  <text x="340" y="498" font-size="13" font-weight="600" text-anchor="middle" fill="#1E3A6E">User input</text>
+  <text x="340" y="515" font-size="11" text-anchor="middle" fill="#3560A0">Single customer or CSV upload</text>
+
+  <line x1="340" y1="524" x2="340" y2="545" stroke="#93C5FD" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- Inference -->
+  <rect x="230" y="545" width="220" height="44" rx="8" fill="#DBEAFE" stroke="#2563EB" stroke-width="1.2"/>
+  <text x="340" y="563" font-size="13" font-weight="600" text-anchor="middle" fill="#1E3A6E">XGBoost inference</text>
+  <text x="340" y="580" font-size="11" text-anchor="middle" fill="#3560A0">Churn probability  0 – 100 %</text>
+
+  <!-- 5 fan-out arrows -->
+  <path d="M268 589 L100 612 L100 630" fill="none" stroke="#93C5FD" stroke-width="1.2" stroke-opacity="0.6" marker-end="url(#arr)"/>
+  <path d="M300 589 L220 612 L220 630" fill="none" stroke="#93C5FD" stroke-width="1.2" stroke-opacity="0.6" marker-end="url(#arr)"/>
+  <line x1="340" y1="589" x2="340" y2="630" stroke="#93C5FD" stroke-width="1.2" stroke-opacity="0.6" marker-end="url(#arr)"/>
+  <path d="M380 589 L460 612 L460 630" fill="none" stroke="#93C5FD" stroke-width="1.2" stroke-opacity="0.6" marker-end="url(#arr)"/>
+  <path d="M412 589 L580 612 L580 630" fill="none" stroke="#93C5FD" stroke-width="1.2" stroke-opacity="0.6" marker-end="url(#arr)"/>
+
+  <!-- 5 output boxes -->
+  <rect x="42"  y="630" width="116" height="48" rx="8" fill="#EDE9FE" stroke="#A78BFA" stroke-width="0.8"/>
+  <text x="100" y="648" font-size="12" font-weight="600" text-anchor="middle" fill="#3C1D8A">SHAP</text>
+  <text x="100" y="665" font-size="10" text-anchor="middle" fill="#5E4AAB">Feature attribution</text>
+
+  <rect x="166" y="630" width="116" height="48" rx="8" fill="#CCFBF1" stroke="#0D9488" stroke-width="0.8"/>
+  <text x="224" y="648" font-size="12" font-weight="600" text-anchor="middle" fill="#0F4A43">Priority score</text>
+  <text x="224" y="665" font-size="10" text-anchor="middle" fill="#1D6B62">Revenue × risk</text>
+
+  <rect x="290" y="630" width="100" height="48" rx="8" fill="#FFE4E6" stroke="#F43F5E" stroke-width="0.8"/>
+  <text x="340" y="648" font-size="12" font-weight="600" text-anchor="middle" fill="#7F1D2A">What-If</text>
+  <text x="340" y="665" font-size="10" text-anchor="middle" fill="#A02030">12 parameters</text>
+
+  <rect x="398" y="630" width="124" height="48" rx="8" fill="#FEF3C7" stroke="#D97706" stroke-width="0.8"/>
+  <text x="460" y="648" font-size="12" font-weight="600" text-anchor="middle" fill="#7C3700">Budget optimizer</text>
+  <text x="460" y="665" font-size="10" text-anchor="middle" fill="#A05A00">224% ROI proven</text>
+
+  <rect x="530" y="630" width="100" height="48" rx="8" fill="#DBEAFE" stroke="#93C5FD" stroke-width="0.8"/>
+  <text x="580" y="648" font-size="12" font-weight="600" text-anchor="middle" fill="#1E3A6E">Batch CSV</text>
+  <text x="580" y="665" font-size="10" text-anchor="middle" fill="#3560A0">Download results</text>
+</svg>
+</p>
 
 ---
 
