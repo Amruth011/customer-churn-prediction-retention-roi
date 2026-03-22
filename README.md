@@ -430,7 +430,7 @@ Yes — every slider change re-runs live inference on the trained XGBoost model.
 
 **Amruth Kumar M**  
 B.Tech AI & Data Science · REVA University, Bengaluru  
-Data Science Intern @ iStudio Technologies
+Data Science Intern @ iStudio
 
 <br/>
 
