@@ -66,18 +66,89 @@ Load a high-risk customer profile → see the churn prediction → read the SHAP
 
 ---
 
-## What's Inside: 8-Page Dashboard
+## The 8-Page Dashboard
 
-| Page | What it does |
-|---|---|
-| 🏠 **Home** | Business narrative — problem, approach, impact |
-| 🔮 **Churn Predictor** | Live prediction + SHAP waterfall + priority score |
-| 🎯 **Priority Score** | Revenue-weighted ranking of all 937 at-risk customers |
-| 🔄 **What-If Simulator** | Adjust 12 parameters, see churn probability update live |
-| 💰 **Budget Optimizer** | Allocate a fixed budget for maximum revenue saved |
-| 🔬 **Model Transparency** | Real metrics from held-out test data — nothing hardcoded |
-| 📅 **Cohort Analysis** | When do customers actually churn? (Spoiler: first 90 days) |
-| 📦 **Batch Analysis** | Upload CSV → bulk predictions + downloadable results |
+---
+
+### 🏠 Page 1 — Home: The Business Story
+
+Built for business stakeholders, not just data scientists. Opens with a clear problem → approach → result narrative so anyone walking in understands the stakes in 30 seconds.
+
+![Home Page](assets/home.gif)
+
+---
+
+### 🔮 Page 2 — Churn Predictor: Predict + Explain in One Shot
+
+Enter any customer's details → get churn probability, risk gauge, live SHAP waterfall explanation, and priority score — all in one click.
+
+![Churn Predictor](assets/predictor.gif)
+
+> **What's unique:** Most projects show a score. This one shows *why* — real SHAP values computed live from the XGBoost model, color-coded red (pushes toward churn) or green (pushes away from churn), with each feature's exact contribution.
+
+---
+
+### 🎯 Page 3 — Priority Score: Who to Call First
+
+Not all at-risk customers deserve equal attention. A customer with ₹50,000 revenue at 90% churn risk is 10× more urgent than one at ₹1,000 with 95% risk.
+
+**Formula: `Priority Score = Annual Revenue × Churn Probability`**
+
+![Priority Score](assets/priority.gif)
+
+| Priority Level | Score | Action |
+|---|---|---|
+| 🔴 Priority 1 | ≥ 20,000 | Contact immediately |
+| 🟡 Priority 2 | ≥ 5,000 | Contact this week |
+| 🟢 Priority 3 | < 5,000 | Standard follow-up |
+
+---
+
+### 🔄 Page 4 — What-If Retention Simulator
+
+Before spending money, test what actually works. Adjust 12 customer parameters and see in real time how each retention action changes churn probability.
+
+![What-If Simulator](assets/whatif.gif)
+
+**12 Parameters:** Tenure · Cashback Amount · Hours on App · Annual Revenue · Satisfaction Score · Order Count · Devices Registered · City Tier · Complained · Days Since Last Order · Coupons Used · Number of Addresses
+
+---
+
+### 💰 Page 5 — Retention Budget Optimizer
+
+Given a fixed budget, allocate it across the 937 high-risk customers to maximize total revenue saved — starting from the highest-ROI segment first.
+
+![Budget Optimizer](assets/budget.gif)
+
+> Shows exact budget split, projected revenue saved, and campaign ROI. Warns when budget is below the ₹500/customer minimum threshold.
+
+---
+
+### 🔬 Page 6 — Model Transparency: Real Metrics, Nothing Hidden
+
+Every number on this page is computed live from the actual model on real held-out test data. No hardcoding, no cherry-picking.
+
+![Model Transparency](assets/model.gif)
+
+Shows: AUC · Accuracy · Confusion Matrix (real TP/TN/FP/FN) · ROC Curve · Feature Importance · Precision / Recall / F1 · Class imbalance handling note.
+
+---
+
+### 📅 Page 7 — Cohort Analysis: When Do Customers Actually Churn?
+
+The feature no other student churn project has. Analyzes churn patterns across customer tenure segments to reveal *when* customers are most at risk.
+
+![Cohort Analysis](assets/cohort.gif)
+
+> **Key Finding:** Customers in the 0–3 month window churn at **41.9%** — 6× higher than loyal customers. New customer onboarding is the #1 retention priority.
+
+---
+
+### 📦 Page 8 — Batch Analysis: Production-Scale Predictions
+
+Upload a CSV of any number of customers → get predictions, risk scores, and priority rankings for all of them at once. Download results instantly.
+
+![Batch Analysis](assets/batch.gif)
 
 ---
 
