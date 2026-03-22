@@ -1,9 +1,5 @@
 <div align="center">
 
-<img src="assets/home.gif" width="100%" style="border-radius:12px;" />
-
-<br/><br/>
-
 # Customer Churn Prediction & Retention ROI
 
 ### *Most ML projects predict. This one prevents — and proves the business case.*
@@ -23,6 +19,10 @@
 > **End-to-end. Live. Production-grade.**
 
 <br/>
+
+<img src="assets/home.gif" width="100%" style="border-radius:12px;" />
+
+<br/><br/>
 
 </div>
 
